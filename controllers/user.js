@@ -28,14 +28,11 @@ exports.signUp = async (req, res) => {
     userEmail,
     userPassword,
     userDOB,
-    userParticipationType,
-    groupSize,
     userGender,
     userPhone,
     userWhatsapp,
     userCountry,
     userCollege,
-    userCollegeId,
     userReason,
   } = req.body;
 
@@ -66,14 +63,11 @@ exports.signUp = async (req, res) => {
               userEmail: userEmail,
               userPassword: hash,
               userDOB,
-              userParticipationType,
               userGender,
               userPhone,
-              groupSize,
               userWhatsapp,
               userCountry,
               userCollege,
-              userCollegeId,
               userReason,
             });
 
