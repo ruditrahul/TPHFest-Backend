@@ -1,4 +1,6 @@
 const User = require("../models/userModel");
+const Registration = require("../models/registrationModel");
+const Group = require("../models/groupModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
@@ -8,7 +10,7 @@ const saltRounds = 10;
 // All GET Requests
 
 exports.getUserById = async (req, res) => {
-  const userId = req.params.userId;
+  const userId = req.body.id;
 
   User.findById({ _id: userId })
     .then((foundUser) => {
@@ -34,6 +36,7 @@ exports.signUp = async (req, res) => {
     userCountry,
     userCollege,
     userReason,
+    userRefferalToken,
   } = req.body;
 
   if (!userName || !userEmail || !userPassword)
@@ -46,17 +49,38 @@ exports.signUp = async (req, res) => {
         bcrypt.hash(userPassword, saltRounds, async function (err, hash) {
           if (err) res.json({ message: "Error" });
           else {
-            count = count + 1;
-            let uid;
-            await User.find({ uid: uid }).then((foundUID) => {
-              let c = count.toString();
-              if (!foundUID) {
-                uid = "TPH" + c;
-              } else {
-                count++;
-                uid = "TPH" + c;
-              }
-            });
+            // count = count + 1;
+            // let uid;
+            // await User.find({ uid: uid }).then((foundUID) => {
+            //   let c = count.toString();
+            //   if (!foundUID) {
+            //     uid = "TPH" + c;
+            //   } else {
+            //     count++;
+            //     uid = "TPH" + c;
+            //   }
+            // });
+
+            const lastUser = await User.findOne(
+              {},
+              {},
+              { sort: { created_at: -1 } }
+            );
+            if (!lastUser) {
+              count = count + 1;
+              uid = "TPH" + count.toString();
+            } else {
+              lastUserUID = lastUser.uid;
+              // console.log(lastUser);
+              // console.log(
+              //   "TPH" + (parseInt(lastUser.uid.substring(3, 8)) + 1).toString()
+              // );
+
+              uid =
+                "TPH" + (parseInt(lastUser.uid.substring(3, 8)) + 1).toString();
+            }
+
+            console.log(uid);
             const newUser = new User({
               uid,
               userName: userName,
@@ -69,6 +93,7 @@ exports.signUp = async (req, res) => {
               userCountry,
               userCollege,
               userReason,
+              userRefferalToken,
             });
 
             newUser.save().then((user) => {
@@ -147,46 +172,121 @@ exports.updateUserDetails = async (req, res) => {
     });
 };
 
+exports.createGroup = async (req, res) => {
+  const userId = req.user.id;
+  const groupName = req.body.groupName;
+  const groupMembers = req.body.groupMembers;
+
+  const groupMemberIds = [];
+  for (const memberId of groupMembers) {
+    await User.findOne({ uid: memberId }).then((foundUser) => {
+      groupMemberIds.push(foundUser.id);
+    });
+  }
+
+  const newGroup = new Group({
+    groupAdmin: userId,
+    groupName,
+    groupMembers: groupMemberIds,
+  });
+
+  newGroup
+    .save()
+    .then(async (newGroup) => {
+      if (newGroup) {
+        for (const memberId of groupMemberIds) {
+          await User.findByIdAndUpdate(
+            { _id: memberId },
+            { $push: { userGroups: newGroup.id } }
+          ).then((updatedUser) => {
+            console.log(updatedUser);
+          });
+        }
+
+        res
+          .status(200)
+          .json({ message: "Group Created Successfully", data: newGroup });
+      } else res.status(404).json({ message: "Error in creating group" });
+    })
+    .catch((err) => {
+      res.status(503).json({ error: err.message });
+    });
+};
+
 exports.registerEvent = async (req, res) => {
-  const userId = req.params.userId;
+  const userId = req.user.id;
   const eventName = req.body.eventName;
+  const participationType = req.body.participationType;
+  const groupId = req.body.groupId;
 
-  User.findByIdAndUpdate(
-    { _id: userId },
-    { $push: { userParticipation: eventName } },
-    { new: true }
-  )
-    .then((updatedUser) => {
-      if (updatedUser) {
-        res.status(200).json({
-          message: "User Registration Successfully",
-          data: updatedUser,
-        });
-      } else res.status(404).json({ message: "User Not Found" });
-    })
-    .catch((err) => {
-      res.status(503).json({ error: err.message });
+  console.log(userId);
+
+  if (groupId) {
+    const newRegistration = new Registration({
+      userId,
+      eventName,
+      participationType,
+      groupId,
     });
+
+    newRegistration
+      .save()
+      .then(async (newRegistration) => {
+        const registrationId = newRegistration.id;
+        await Group.findByIdAndUpdate(
+          { _id: groupId },
+          { $push: { groupRegistrations: registrationId } },
+          { new: true }
+        ).then(async (updatedGroup) => {
+          console.log(updatedGroup);
+          const groupMembersId = updatedGroup.groupMembers;
+          for (const memberId of groupMembersId) {
+            await User.findByIdAndUpdate(
+              { _id: memberId },
+              { $push: { userRegistrations: registrationId } },
+              { new: true }
+            ).then((updatedUser) => {
+              console.log(updatedUser);
+            });
+          }
+        });
+
+        res.status(200).json({
+          message: "Group Regsitration Successfully Done",
+          data: newRegistration,
+        });
+      })
+      .catch((err) => {
+        res.status(503).json({ error: err.message });
+      });
+  } else {
+    const newRegistration = new Registration({
+      userId,
+      eventName,
+      participationType,
+    });
+    newRegistration
+      .save()
+      .then(async (newRegistration) => {
+        const registrationId = newRegistration.id;
+
+        await User.findByIdAndUpdate(
+          { _id: userId },
+          { $push: { userRegistrations: registrationId } },
+          { new: true }
+        ).then((updatedUser) => {
+          console.log(updatedUser);
+        });
+
+        res.status(200).json({
+          message: "Individual Regsitration Successfully Done",
+          data: newRegistration,
+        });
+      })
+      .catch((err) => {
+        res.status(503).json({ error: err.message });
+      });
+  }
 };
 
-exports.cancelEvent = async (req, res) => {
-  const userId = req.params.userId;
-  const eventName = req.body.eventName;
-
-  User.findByIdAndUpdate(
-    { _id: userId },
-    { $pull: { userParticipation: eventName } },
-    { new: true }
-  )
-    .then((updatedUser) => {
-      if (updatedUser) {
-        res.status(200).json({
-          message: "User Registration Successfully",
-          data: updatedUser,
-        });
-      } else res.status(404).json({ message: "User Not Found" });
-    })
-    .catch((err) => {
-      res.status(503).json({ error: err.message });
-    });
-};
+exports.cancelEvent = async (req, res) => {};

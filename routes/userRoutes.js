@@ -3,14 +3,9 @@ const router = express.Router();
 const auth = require("../middleware/auth");
 const UserController = require("../controllers/user");
 
-router.get(
-  "/get-user-by-id/:userId",
-  auth,
-  UserController.getUserById,
-  (err) => {
-    console.log("Error in getting user by ID");
-  }
-);
+router.get("/get-user-by-id", auth, UserController.getUserById, (err) => {
+  console.log("Error in getting user by ID");
+});
 
 router.post("/sign-up", UserController.signUp, (err) => {
   console.log("Error in sign up");
@@ -21,7 +16,7 @@ router.post("/log-in", UserController.logIn, (err) => {
 });
 
 router.post(
-  "/update-user-details/:userId",
+  "/update-user-details",
   auth,
   UserController.updateUserDetails,
   (err) => {
@@ -29,22 +24,16 @@ router.post(
   }
 );
 
-router.post(
-  "/register-event/:userId",
-  auth,
-  UserController.registerEvent,
-  (err) => {
-    console.log("Error in register event");
-  }
-);
+router.post("/create-group", auth, UserController.createGroup, (err) => {
+  console.log("Error in creating group");
+});
 
-router.post(
-  "/cancel-event/:userId",
-  auth,
-  UserController.cancelEvent,
-  (err) => {
-    console.log("Error in register event");
-  }
-);
+router.post("/register-event", auth, UserController.registerEvent, (err) => {
+  console.log("Error in register event");
+});
+
+router.post("/cancel-event", auth, UserController.cancelEvent, (err) => {
+  console.log("Error in register event");
+});
 
 module.exports = router;

@@ -1,60 +1,58 @@
 const mongoose = require("mongoose");
 
-const UserSchema = new mongoose.Schema({
-  uid: {
-    type: String,
-  },
-  userName: {
-    type: String,
-  },
-  userEmail: {
-    type: String,
-  },
-  userPassword: {
-    type: String,
-  },
-  userDOB: {
-    type: String,
-  },
-  userGender: {
-    type: String,
-  },
-  userPhone: {
-    type: String,
-  },
-  userWhatsapp: {
-    type: String,
-  },
-  userCountry: {
-    type: String,
-  },
-  userCollege: {
-    type: String,
-  },
-  userParticipationType: {
-    type: String,
-    enum: ["GROUP", "INDIVIDUAL"],
-  },
-  groupSize: {
-    type: Number,
-    default: 0,
-  },
-  userParticipation: [
-    {
+const UserSchema = new mongoose.Schema(
+  {
+    uid: {
       type: String,
     },
-  ],
-  userCollegeId: {
-    type: String,
+    userName: {
+      type: String,
+    },
+    userEmail: {
+      type: String,
+    },
+    userPassword: {
+      type: String,
+    },
+    userDOB: {
+      type: String,
+    },
+    userGender: {
+      type: String,
+    },
+    userPhone: {
+      type: String,
+    },
+    userWhatsapp: {
+      type: String,
+    },
+    userCountry: {
+      type: String,
+    },
+    userCollege: {
+      type: String,
+    },
+    userReason: {
+      type: String,
+    },
+    userRefferalToken: {
+      type: String,
+    },
+    userGroups: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Group",
+      },
+    ],
+    userRegistrations: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Registration",
+      },
+    ],
   },
-  userReason: {
-    type: String,
-  },
-  dateTime: {
-    type: Date,
-    default: Date.now,
-  },
-});
+  { timestamp: true }
+);
 
 const User = mongoose.model("User", UserSchema);
 module.exports = User;
