@@ -10,9 +10,11 @@ const saltRounds = 10;
 // All GET Requests
 
 exports.getUserById = async (req, res) => {
-  const userId = req.body.id;
+  const userId = req.user.id;
 
   User.findById({ _id: userId })
+    .populate("userGroups")
+    .populate("userRegistrations")
     .then((foundUser) => {
       if (foundUser) res.status(200).json({ data: foundUser });
       else res.status(404).json({ message: "User not found" });
@@ -61,23 +63,21 @@ exports.signUp = async (req, res) => {
             //   }
             // });
 
-            const lastUser = await User.findOne(
-              {},
-              {},
-              { sort: { created_at: -1 } }
-            );
-            if (!lastUser) {
+            const lastUser = await User.find({}).sort({ _id: -1 }).limit(1);
+            console.log(lastUser[0]);
+            if (!lastUser[0]) {
               count = count + 1;
               uid = "TPH" + count.toString();
             } else {
-              lastUserUID = lastUser.uid;
+              lastUserUID = lastUser[0].uid;
               // console.log(lastUser);
               // console.log(
               //   "TPH" + (parseInt(lastUser.uid.substring(3, 8)) + 1).toString()
               // );
 
               uid =
-                "TPH" + (parseInt(lastUser.uid.substring(3, 8)) + 1).toString();
+                "TPH" +
+                (parseInt(lastUser[0].uid.substring(3, 8)) + 1).toString();
             }
 
             console.log(uid);
