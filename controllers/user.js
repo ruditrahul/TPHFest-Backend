@@ -155,7 +155,7 @@ exports.logIn = async (req, res) => {
 };
 
 exports.updateUserDetails = async (req, res) => {
-  const userId = req.params.userId;
+  const userId = req.user.id;
   const updatedData = req.body;
 
   User.findByIdAndUpdate({ _id: userId }, updatedData, { new: true })
