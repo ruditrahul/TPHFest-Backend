@@ -6,7 +6,7 @@ const RegistrationSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
     },
-    registrationType: {
+    participationType: {
       type: String,
     },
     groupId: {
