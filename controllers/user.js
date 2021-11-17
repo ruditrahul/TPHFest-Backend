@@ -14,7 +14,7 @@ exports.getUserById = async (req, res) => {
 
   User.findById({ _id: userId })
     .populate("userGroups")
-    .populate("userRegistrations")
+    .populate({ path: "userRegistrations", populate: "groupId" })
     .then((foundUser) => {
       if (foundUser) res.status(200).json({ data: foundUser });
       else res.status(404).json({ message: "User not found" });
