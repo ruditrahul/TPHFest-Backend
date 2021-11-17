@@ -218,6 +218,7 @@ exports.registerEvent = async (req, res) => {
   const eventName = req.body.eventName;
   const participationType = req.body.participationType;
   const groupId = req.body.groupId;
+  const eventType = req.body.eventType;
 
   console.log(userId);
 
@@ -227,6 +228,7 @@ exports.registerEvent = async (req, res) => {
       eventName,
       participationType,
       groupId,
+      eventType,
     });
 
     newRegistration
@@ -264,6 +266,7 @@ exports.registerEvent = async (req, res) => {
       userId,
       eventName,
       participationType,
+      eventType,
     });
     newRegistration
       .save()
@@ -289,4 +292,56 @@ exports.registerEvent = async (req, res) => {
   }
 };
 
-exports.cancelEvent = async (req, res) => {};
+exports.cancelEvent = async (req, res) => {
+  const userId = req.user.id;
+  const eventId = req.body.eventId;
+
+  await Registration.findById({ _id: eventId }).then(
+    async (foundRegistration) => {
+      if (foundRegistration.groupId) {
+        await Group.findById({ _id: foundRegistration.groupId }).then(
+          async (foundGroup) => {
+            if (foundGroup.groupMembers.length !== 0) {
+              for (const userId of foundGroup.groupMembers) {
+                await User.findByIdAndUpdate(
+                  { _id: userId },
+                  { $pull: { userRegistrations: eventId } }
+                ).then((updatedUser) => {
+                  console.log("User Updated Successfully");
+                });
+              }
+            }
+          }
+        );
+        await Group.findByIdAndUpdate(
+          { _id: foundRegistration.groupId },
+          { $pull: { groupRegistrations: eventId } }
+        ).then((updatedGroup) => {
+          console.log("Group Updated Successfully");
+        });
+
+        res.status(202).json({ message: "Successfully deleted registration" });
+      } else {
+        await User.findByIdAndUpdate(
+          { _id: userId },
+          { $pull: { userRegistrations: eventId } }
+        )
+          .then((updatedUser) => {
+            Registration.findByIdAndDelete({ _id: eventId })
+              .then((deletedRegistration) => {
+                if (deletedRegistration)
+                  res.status(202).json({
+                    message: "Event Registration deleted successfully",
+                  });
+              })
+              .catch((err) => {
+                res.status(503).json({ error: err.message });
+              });
+          })
+          .catch((err) => {
+            res.status(503).json({ error: err.message });
+          });
+      }
+    }
+  );
+};

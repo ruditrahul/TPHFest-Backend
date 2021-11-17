@@ -16,6 +16,9 @@ const RegistrationSchema = new mongoose.Schema(
     eventName: {
       type: String,
     },
+    eventType: {
+      type: String,
+    },
   },
   { timestamp: true }
 );
