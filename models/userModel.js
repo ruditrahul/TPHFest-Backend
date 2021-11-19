@@ -38,6 +38,10 @@ const UserSchema = new mongoose.Schema(
     userRefferalToken: {
       type: String,
     },
+    userPayment: {
+      type: Number,
+      default: 0,
+    },
     userGroups: [
       {
         type: mongoose.Schema.Types.ObjectId,
