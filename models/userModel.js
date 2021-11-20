@@ -38,7 +38,11 @@ const UserSchema = new mongoose.Schema(
     userRefferalToken: {
       type: String,
     },
-    userPayment: {
+    mainEventsPayment: {
+      type: Number,
+      default: 0,
+    },
+    funEventsPayment: {
       type: Number,
       default: 0,
     },
