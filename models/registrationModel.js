@@ -20,8 +20,8 @@ const RegistrationSchema = new mongoose.Schema(
       type: String,
     },
     paymentStatus: {
-      type: boolean,
-      default: false,
+      type: Number,
+      default: 0,
     },
   },
   { timestamp: true }
