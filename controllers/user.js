@@ -39,7 +39,6 @@ exports.signUp = async (req, res) => {
     userCollege,
     userReason,
     userRefferalToken,
-    userPayment,
   } = req.body;
 
   if (!userName || !userEmail || !userPassword)
@@ -95,7 +94,6 @@ exports.signUp = async (req, res) => {
               userCollege,
               userReason,
               userRefferalToken,
-              userPayment,
             });
 
             newUser.save().then((user) => {
