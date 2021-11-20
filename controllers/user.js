@@ -294,7 +294,7 @@ exports.registerEvent = async (req, res) => {
 
 exports.updateEvents = async (req, res) => {
   const regsitrationId = req.params.regsitrationId;
-  await Regsitration.findByIdAndUpdate({ _id: regsitrationId }, req.body, {
+  await Registration.findByIdAndUpdate({ _id: regsitrationId }, req.body, {
     new: true,
   })
     .then((updatedRegistration) => {
