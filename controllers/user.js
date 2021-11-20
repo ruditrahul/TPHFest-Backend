@@ -144,7 +144,7 @@ exports.logIn = async (req, res) => {
               );
             } else {
               res
-                .status(404)
+                .status(400)
                 .json({ message: "Please Enter correct credentials" });
             }
           }
@@ -223,78 +223,96 @@ exports.registerEvent = async (req, res) => {
   console.log(userId);
 
   if (groupId) {
-    const newRegistration = new Registration({
-      userId,
-      eventName,
-      participationType,
-      groupId,
-      eventType,
-    });
+    await Registration.findOne({ groupId: groupId, eventName: eventName })
+      .then((foundRegistration) => {
+        if (foundRegistration)
+          res.status(400).json({ message: "Already registered" });
+        else {
+          const newRegistration = new Registration({
+            userId,
+            eventName,
+            participationType,
+            groupId,
+            eventType,
+          });
 
-    newRegistration
-      .save()
-      .then(async (newRegistration) => {
-        const registrationId = newRegistration.id;
-        await Group.findByIdAndUpdate(
-          { _id: groupId },
-          { $push: { groupRegistrations: registrationId } },
-          { new: true }
-        ).then(async (updatedGroup) => {
-          console.log(updatedGroup);
-          const groupMembersId = updatedGroup.groupMembers;
-          for (const memberId of groupMembersId) {
-            await User.findByIdAndUpdate(
-              { _id: memberId },
-              { $push: { userRegistrations: registrationId } },
-              { new: true }
-            ).then((updatedUser) => {
-              console.log(updatedUser);
+          newRegistration
+            .save()
+            .then(async (newRegistration) => {
+              const registrationId = newRegistration.id;
+              await Group.findByIdAndUpdate(
+                { _id: groupId },
+                { $push: { groupRegistrations: registrationId } },
+                { new: true }
+              ).then(async (updatedGroup) => {
+                console.log(updatedGroup);
+                const groupMembersId = updatedGroup.groupMembers;
+                for (const memberId of groupMembersId) {
+                  await User.findByIdAndUpdate(
+                    { _id: memberId },
+                    { $push: { userRegistrations: registrationId } },
+                    { new: true }
+                  ).then((updatedUser) => {
+                    console.log(updatedUser);
+                  });
+                }
+              });
+
+              res.status(200).json({
+                message: "Group Regsitration Successfully Done",
+                data: newRegistration,
+              });
+            })
+            .catch((err) => {
+              res.status(503).json({ error: err.message });
             });
-          }
-        });
-
-        res.status(200).json({
-          message: "Group Regsitration Successfully Done",
-          data: newRegistration,
-        });
+        }
       })
       .catch((err) => {
         res.status(503).json({ error: err.message });
       });
   } else {
-    const newRegistration = new Registration({
-      userId,
-      eventName,
-      participationType,
-      eventType,
-    });
-    newRegistration
-      .save()
-      .then(async (newRegistration) => {
-        const registrationId = newRegistration.id;
+    await Registration.findOne({ userId: userId, eventName: eventName }).then(
+      (foundRegistration) => {
+        if (foundRegistration)
+          res.status(400).json({ message: "Already Registrated" });
+        else {
+          const newRegistration = new Registration({
+            userId,
+            eventName,
+            participationType,
+            eventType,
+          });
+          newRegistration
+            .save()
+            .then(async (newRegistration) => {
+              const registrationId = newRegistration.id;
 
-        await User.findByIdAndUpdate(
-          { _id: userId },
-          { $push: { userRegistrations: registrationId } },
-          { new: true }
-        ).then((updatedUser) => {
-          console.log(updatedUser);
-        });
+              await User.findByIdAndUpdate(
+                { _id: userId },
+                { $push: { userRegistrations: registrationId } },
+                { new: true }
+              ).then((updatedUser) => {
+                console.log(updatedUser);
+              });
 
-        res.status(200).json({
-          message: "Individual Regsitration Successfully Done",
-          data: newRegistration,
-        });
-      })
-      .catch((err) => {
-        res.status(503).json({ error: err.message });
-      });
+              res.status(200).json({
+                message: "Individual Regsitration Successfully Done",
+                data: newRegistration,
+              });
+            })
+            .catch((err) => {
+              res.status(503).json({ error: err.message });
+            });
+        }
+      }
+    );
   }
 };
 
 exports.updateEvents = async (req, res) => {
-  const regsitrationId = req.params.regsitrationId;
-  await Registration.findByIdAndUpdate({ _id: regsitrationId }, req.body, {
+  const registrationId = req.params.registrationId;
+  await Registration.findByIdAndUpdate({ _id: registrationId }, req.body, {
     new: true,
   })
     .then((updatedRegistration) => {

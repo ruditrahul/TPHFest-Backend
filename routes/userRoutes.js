@@ -33,7 +33,7 @@ router.post("/register-event", auth, UserController.registerEvent, (err) => {
 });
 
 router.patch(
-  "/update-event/:regsitrationId",
+  "/update-event/:registrationId",
   auth,
   UserController.updateEvents,
   (err) => {
