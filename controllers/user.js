@@ -292,6 +292,21 @@ exports.registerEvent = async (req, res) => {
   }
 };
 
+exports.updateEvents = async (req, res) => {
+  const regsitrationId = req.params.regsitrationId;
+  await Regsitration.findByIdAndUpdate({ _id: regsitrationId }, req.body, {
+    new: true,
+  })
+    .then((updatedRegistration) => {
+      if (updatedRegistration) {
+        res.status(200).json({ data: updatedRegistration });
+      } else res.status(404).json({ data: "Error" });
+    })
+    .catch((err) => {
+      res.status(503).json({ error: err.message });
+    });
+};
+
 exports.cancelEvent = async (req, res) => {
   const userId = req.user.id;
   const eventId = req.body.eventId;

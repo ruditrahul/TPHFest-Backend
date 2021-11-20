@@ -32,6 +32,15 @@ router.post("/register-event", auth, UserController.registerEvent, (err) => {
   console.log("Error in register event");
 });
 
+router.patch(
+  "/update-event/:regsitrationId",
+  auth,
+  UserController.updateEvents,
+  (err) => {
+    console.log("Error in update event");
+  }
+);
+
 router.post("/cancel-event", auth, UserController.cancelEvent, (err) => {
   console.log("Error in register event");
 });

@@ -19,6 +19,10 @@ const RegistrationSchema = new mongoose.Schema(
     eventType: {
       type: String,
     },
+    paymentStatus: {
+      type: boolean,
+      default: false,
+    },
   },
   { timestamp: true }
 );
