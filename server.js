@@ -25,9 +25,12 @@ mongoose
 const PORT = process.env.PORT || 8000;
 
 var instance = new razorpay({
-  key_id: "rzp_test_DC9Y7TPOChYcuP",
-  key_secret: "RvdcKmFgkplVjxWqmMldMYCV",
+  key_id: "rzp_live_FlEgz7lscE95xL",
+  key_secret: "CBNHfPfOkNHsjxQK5h80wP4N",
 });
+
+
+
 
 app.get("/payment", (req, res) => {
   res.status(200).json("Hello ji");
@@ -54,14 +57,9 @@ app.get("/payment/order/:Amount", (req, res) => {
 
 app.post("/verify/razorpay-signature", (req, res) => {
   console.log(JSON.stringify(req.body));
-  // console.log("paymentID : " + JSON.stringify(req.body.payload.payment.entity.id))
-  // console.log("OrderId : " + JSON.stringify(req.body.payload.payment.entity.order_id))
-
+ 
   const orderId = req.body.payload.payment.entity.order_id;
   const paymentId = req.body.payload.payment.entity.id;
-
-  // console.log(orderId);
-  // console.log(paymentId);
 
 
   const crypto = require("crypto");
