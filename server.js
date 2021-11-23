@@ -52,14 +52,24 @@ app.get("/payment/order/:Amount", (req, res) => {
   });
 });
 
-app.post("/verify/razorpay-signature/:orderId", (req, res) => {
-  console.log(req.params.orderId);
-  // console.log(JSON.stringify(req.body));
+app.post("/verify/razorpay-signature", (req, res) => {
+  console.log(JSON.stringify(req.body));
+  // console.log("paymentID : " + JSON.stringify(req.body.payload.payment.entity.id))
+  // console.log("OrderId : " + JSON.stringify(req.body.payload.payment.entity.order_id))
+
+  const orderId = req.body.payload.payment.entity.order_id;
+  const paymentId = req.body.payload.payment.entity.id;
+
+  // console.log(orderId);
+  // console.log(paymentId);
+
+
   const crypto = require("crypto");
   const hash = crypto
-    .createHmac("SHA256", "12345678")
+    .createHmac("SHA256", "iloveOTTFest987")
     .update(JSON.stringify(req.body))
     .digest("hex");
+  console.log("\n\n");
   // console.log(hash);
   // console.log(req.headers["x-razorpay-signature"]);
 
