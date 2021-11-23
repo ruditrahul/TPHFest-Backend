@@ -46,6 +46,13 @@ const UserSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
+    userOrderId : {
+      type : String
+    },
+    userPaymentId : {
+      type : String
+    }
+    ,
     userGroups: [
       {
         type: mongoose.Schema.Types.ObjectId,

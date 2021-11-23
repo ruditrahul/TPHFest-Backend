@@ -52,7 +52,8 @@ app.get("/payment/order/:Amount", (req, res) => {
   });
 });
 
-app.post("/verify/razorpay-signature", (req, res) => {
+app.post("/verify/razorpay-signature/:orderId", (req, res) => {
+  console.log(req.params.orderId);
   // console.log(JSON.stringify(req.body));
   const crypto = require("crypto");
   const hash = crypto
