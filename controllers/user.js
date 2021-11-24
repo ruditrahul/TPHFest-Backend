@@ -226,7 +226,7 @@ exports.registerEvent = async (req, res) => {
     await Registration.findOne({ groupId: groupId, eventName: eventName })
       .then((foundRegistration) => {
         if (foundRegistration)
-          res.status(400).json({ message: "Already registered" });
+          res.status(400).json({ message: "Already Registered" });
         else {
           const newRegistration = new Registration({
             userId,
@@ -275,7 +275,7 @@ exports.registerEvent = async (req, res) => {
     await Registration.findOne({ userId: userId, eventName: eventName }).then(
       (foundRegistration) => {
         if (foundRegistration)
-          res.status(400).json({ message: "Already Registrated" });
+          res.status(400).json({ message: "Already Registered" });
         else {
           const newRegistration = new Registration({
             userId,
