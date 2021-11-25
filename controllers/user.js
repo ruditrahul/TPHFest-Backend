@@ -48,7 +48,7 @@ exports.getAllRegistrations = (req, res) => {
 exports.getAllGroups = (req, res) => {
   Group.find({})
     .populate("groupAdmin", "userName userPhone uid")
-    .popualate("groupMembers")
+    .populate("groupMembers", "userName userPhone uid")
     .populate("groupRegistrations")
     .then((foundRegistration) => {
       res.status(202).json({ data: foundRegistration });
