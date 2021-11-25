@@ -34,6 +34,30 @@ exports.getAllUsers = (req, res) => {
     });
 };
 
+exports.getAllRegistrations = (req, res) => {
+  Registration.find({})
+    .populate("userId", "userName userPhone uid")
+    .then((foundRegistration) => {
+      res.status(202).json({ data: foundRegistration });
+    })
+    .catch((err) => {
+      res.status(503).json({ message: err.message });
+    });
+};
+
+exports.getAllGroups = (req, res) => {
+  Group.find({})
+    .populate("groupAdmin", "userName userPhone uid")
+    .popualate("groupMembers")
+    .populate("groupRegistrations")
+    .then((foundRegistration) => {
+      res.status(202).json({ data: foundRegistration });
+    })
+    .catch((err) => {
+      res.status(503).json({ message: err.message });
+    });
+};
+
 // All POST Requests
 
 exports.signUp = async (req, res) => {

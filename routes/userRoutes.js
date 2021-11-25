@@ -10,6 +10,17 @@ router.get("/get-user-by-id", auth, UserController.getUserById, (err) => {
 router.get("/get-all-users", UserController.getAllUsers, (err) => {
   console.log("Error in getting all users");
 });
+router.get(
+  "/get-all-registrations",
+  UserController.getAllRegistrations,
+  (err) => {
+    console.log("Error in getting all users");
+  }
+);
+
+router.get("/get-all-groups", UserController.getAllGroups, (err) => {
+  console.log("Error in getting all users");
+});
 
 router.post("/sign-up", UserController.signUp, (err) => {
   console.log("Error in sign up");
