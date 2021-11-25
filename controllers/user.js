@@ -24,6 +24,16 @@ exports.getUserById = async (req, res) => {
     });
 };
 
+exports.getAllUsers = (req, res) => {
+  User.find({})
+    .then((foundUser) => {
+      res.status(202).json({ data: foundUser });
+    })
+    .catch((err) => {
+      res.status(503).json({ message: err.message });
+    });
+};
+
 // All POST Requests
 
 exports.signUp = async (req, res) => {
