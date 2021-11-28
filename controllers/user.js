@@ -75,10 +75,10 @@ exports.signUp = async (req, res) => {
     userRefferalToken,
   } = req.body;
 
-  if (!userName || !userEmail || !userPassword)
+  if (!userName || !userEmail || !userPassword || !userPhone)
     res.status(400).json({ message: "Please Enter all fields" });
 
-  User.findOne({ userEmail: userEmail })
+  User.findOne({ $or: [{ userEmail: userEmail }, { userPhone: userPhone }] })
     .then((foundUser) => {
       if (foundUser) res.status(400).json({ message: "User Already Exists" });
       else {
@@ -212,39 +212,44 @@ exports.createGroup = async (req, res) => {
   const groupMembers = req.body.groupMembers;
 
   const groupMemberIds = [];
-  for (const memberId of groupMembers) {
-    await User.findOne({ uid: memberId }).then((foundUser) => {
-      groupMemberIds.push(foundUser.id);
+  const group = await Group.findOne({ groupName: groupName });
+  if (group.length !== 0)
+    res.status(400).json({ message: "Group Name Already Exists" });
+  else {
+    for (const memberId of groupMembers) {
+      await User.findOne({ uid: memberId }).then((foundUser) => {
+        groupMemberIds.push(foundUser.id);
+      });
+    }
+
+    const newGroup = new Group({
+      groupAdmin: userId,
+      groupName,
+      groupMembers: groupMemberIds,
     });
+
+    newGroup
+      .save()
+      .then(async (newGroup) => {
+        if (newGroup) {
+          for (const memberId of groupMemberIds) {
+            await User.findByIdAndUpdate(
+              { _id: memberId },
+              { $push: { userGroups: newGroup.id } }
+            ).then((updatedUser) => {
+              console.log(updatedUser);
+            });
+          }
+
+          res
+            .status(200)
+            .json({ message: "Group Created Successfully", data: newGroup });
+        } else res.status(404).json({ message: "Error in creating group" });
+      })
+      .catch((err) => {
+        res.status(503).json({ error: err.message });
+      });
   }
-
-  const newGroup = new Group({
-    groupAdmin: userId,
-    groupName,
-    groupMembers: groupMemberIds,
-  });
-
-  newGroup
-    .save()
-    .then(async (newGroup) => {
-      if (newGroup) {
-        for (const memberId of groupMemberIds) {
-          await User.findByIdAndUpdate(
-            { _id: memberId },
-            { $push: { userGroups: newGroup.id } }
-          ).then((updatedUser) => {
-            console.log(updatedUser);
-          });
-        }
-
-        res
-          .status(200)
-          .json({ message: "Group Created Successfully", data: newGroup });
-      } else res.status(404).json({ message: "Error in creating group" });
-    })
-    .catch((err) => {
-      res.status(503).json({ error: err.message });
-    });
 };
 
 exports.registerEvent = async (req, res) => {
