@@ -212,7 +212,7 @@ exports.createGroup = async (req, res) => {
   const groupMembers = req.body.groupMembers;
 
   const groupMemberIds = [];
-  const group = await Group.findOne({ groupName: groupName });
+  const group = await Group.find({ groupName: groupName });
   if (group.length !== 0)
     res.status(400).json({ message: "Group Name Already Exists" });
   else {
