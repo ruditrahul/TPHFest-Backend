@@ -30,6 +30,14 @@ router.post("/log-in", UserController.logIn, (err) => {
   console.log("Error in log in");
 });
 
+router.post("/register-admin", UserController.registerAdmin, (err) => {
+  console.log("Error in register admin");
+});
+
+router.post("/log-in-admin", UserController.logInAdmin, (err) => {
+  console.log("Error in log in admin");
+});
+
 router.post(
   "/update-user-details",
   auth,

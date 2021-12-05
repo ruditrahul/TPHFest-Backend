@@ -1,6 +1,7 @@
 const User = require("../models/userModel");
 const Registration = require("../models/registrationModel");
 const Group = require("../models/groupModel");
+const Admin = require("../models/adminModel");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 
@@ -143,6 +144,37 @@ exports.signUp = async (req, res) => {
           }
         });
       }
+    })
+    .catch((err) => {
+      res.status(500).json({ error: err.message });
+    });
+};
+
+exports.registerAdmin = async (req, res) => {
+  const { email, password } = req.body;
+
+  const newAdmin = new Admin({
+    email: email,
+    password: password,
+  })
+    .save()
+    .then((newAdmin) => {
+      res.status(200).json({ data: newAdmin });
+    })
+    .catch((err) => {
+      res.status(500).json({ error: err.message });
+    });
+};
+
+exports.logInAdmin = async (req, res) => {
+  const { email, password } = req.body;
+
+  await Admin.findOne({ email: email })
+    .then((admin) => {
+      if (admin) {
+        if (admin.password === password) res.status(200).json({ data: admin });
+        else res.status(404).json({ message: "Please enter a valid password" });
+      } else res.status(404).json({ message: "Please enter a valid email" });
     })
     .catch((err) => {
       res.status(500).json({ error: err.message });
