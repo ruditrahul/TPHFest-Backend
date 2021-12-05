@@ -27,6 +27,8 @@ exports.getUserById = async (req, res) => {
 
 exports.getAllUsers = (req, res) => {
   User.find({})
+    .populate("userGroups")
+    .populate("userRegistrations")
     .then((foundUser) => {
       res.status(202).json({ data: foundUser });
     })
