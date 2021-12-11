@@ -22,6 +22,14 @@ router.get("/get-all-groups", UserController.getAllGroups, (err) => {
   console.log("Error in getting all users");
 });
 
+router.post(
+  "/update-password/:userId",
+  UserController.updatePassword,
+  (err) => {
+    console.log("Error in updating password");
+  }
+);
+
 router.post("/sign-up", UserController.signUp, (err) => {
   console.log("Error in sign up");
 });

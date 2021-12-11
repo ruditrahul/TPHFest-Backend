@@ -88,18 +88,6 @@ exports.signUp = async (req, res) => {
         bcrypt.hash(userPassword, saltRounds, async function (err, hash) {
           if (err) res.json({ message: "Error" });
           else {
-            // count = count + 1;
-            // let uid;
-            // await User.find({ uid: uid }).then((foundUID) => {
-            //   let c = count.toString();
-            //   if (!foundUID) {
-            //     uid = "TPH" + c;
-            //   } else {
-            //     count++;
-            //     uid = "TPH" + c;
-            //   }
-            // });
-
             const lastUser = await User.find({}).sort({ _id: -1 }).limit(1);
             console.log(lastUser[0]);
             if (!lastUser[0]) {
@@ -107,10 +95,6 @@ exports.signUp = async (req, res) => {
               uid = "TPH" + count.toString();
             } else {
               lastUserUID = lastUser[0].uid;
-              // console.log(lastUser);
-              // console.log(
-              //   "TPH" + (parseInt(lastUser.uid.substring(3, 8)) + 1).toString()
-              // );
 
               uid =
                 "TPH" +
@@ -166,6 +150,25 @@ exports.registerAdmin = async (req, res) => {
     .catch((err) => {
       res.status(500).json({ error: err.message });
     });
+};
+
+exports.updatePassword = async (req, res) => {
+  const userId = req.params.userId;
+  const userPassword = req.body.userPassword;
+
+  bcrypt.hash(userPassword, saltRounds, async function (err, hash) {
+    await User.findByIdAndUpdate(
+      { _id: userId },
+      { userPassword: hash },
+      { new: true }
+    )
+      .then((updatedUser) => {
+        res.status(202).json({ data: updatedUser });
+      })
+      .catch((err) => {
+        res.status(500).json({ error: err.message });
+      });
+  });
 };
 
 exports.logInAdmin = async (req, res) => {
