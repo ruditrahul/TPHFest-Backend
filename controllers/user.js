@@ -78,37 +78,56 @@ exports.signUp = async (req, res) => {
     userRefferalToken,
   } = req.body;
 
+  if (!userName || !userEmail || !userPassword || !userPhone)
+    res.status(400).json({ message: "Please Enter all fields" });
+
   User.findOne({ $or: [{ userEmail: userEmail }, { userPhone: userPhone }] })
-    .then(async (foundUser) => {
+    .then((foundUser) => {
       if (foundUser) res.status(400).json({ message: "User Already Exists" });
       else {
-        const lastUser = await User.find({}).sort({ _id: -1 }).limit(1);
-        console.log(lastUser[0]);
-        if (!lastUser[0]) {
-          count = count + 1;
-          uid = "TPH" + count.toString();
-        } else {
-          lastUserUID = lastUser[0].uid;
+        bcrypt.hash(userPassword, saltRounds, async function (err, hash) {
+          if (err) res.json({ message: "Error" });
+          else {
+            const lastUser = await User.find({}).sort({ _id: -1 }).limit(1);
+            console.log(lastUser[0]);
+            if (!lastUser[0]) {
+              count = count + 1;
+              uid = "TPH" + count.toString();
+            } else {
+              lastUserUID = lastUser[0].uid;
 
-          uid =
-            "TPH" + (parseInt(lastUser[0].uid.substring(3, 8)) + 1).toString();
-        }
+              uid =
+                "TPH" +
+                (parseInt(lastUser[0].uid.substring(3, 8)) + 1).toString();
+            }
 
-        console.log(uid);
-        const newUser = new User({
-          uid,
-          userPhone,
-        });
-
-        newUser.save().then((user) => {
-          jwt.sign({ id: user.id }, process.env.SECRET, (err, token) => {
-            if (err) throw err;
-            res.status(200).json({
-              message: "User Sign Up Successful",
-              data: user,
-              token: token,
+            console.log(uid);
+            const newUser = new User({
+              uid,
+              userName: userName,
+              userEmail: userEmail,
+              userPassword: hash,
+              userDOB,
+              userGender,
+              userPhone,
+              userWhatsapp,
+              userCountry,
+              userCollege,
+              userReason,
+              userRefferalToken,
             });
-          });
+
+            newUser.save().then((user) => {
+              jwt.sign({ id: user.id }, process.env.SECRET, (err, token) => {
+                if (err) throw err;
+                res.status(200).json({
+                  message: "User Sign Up Successful",
+                  data: user,
+                  token: token,
+                });
+              });
+            });
+          }
         });
       }
     })
@@ -210,12 +229,7 @@ exports.updateUserDetails = async (req, res) => {
   const userId = req.user.id;
   const updatedData = req.body;
 
-  await bcrypt
-    .hash(updatedData.userPassword, saltRounds)
-    .then(async function (hash) {
-      updatedData.userPassword = hash;
-    });
-  await User.findByIdAndUpdate({ _id: userId }, updatedData, { new: true })
+  User.findByIdAndUpdate({ _id: userId }, updatedData, { new: true })
     .then((updateUserDetails) => {
       if (updateUserDetails)
         res.status(200).json({
@@ -414,12 +428,6 @@ exports.cancelEvent = async (req, res) => {
         ).then((updatedGroup) => {
           console.log("Group Updated Successfully");
         });
-
-        await Group.findByIdAndDelete({ _id: foundRegistration.groupId }).then(
-          (updatedGroup) => {
-            console.log("Group Delete Successfully");
-          }
-        );
 
         res.status(202).json({ message: "Successfully deleted registration" });
       } else {
