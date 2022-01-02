@@ -431,7 +431,7 @@ exports.cancelEvent = async (req, res) => {
 
         await Group.findByIdAndDelete({ _id: foundRegistration.groupId }).then(
           (updatedGroup) => {
-            console.log("Group Updated Successfully");
+            console.log("Group Deleted Successfully");
           }
         );
 
